@@ -9,7 +9,7 @@ class IperfServer:
       self.port = port
 
 
-def publicIperfServers():
+def publicIperfServers(debug=False):
    html = requests.get('https://iperf.fr/iperf-servers.php')
    htmlStr = html.text
    
@@ -17,7 +17,7 @@ def publicIperfServers():
    tableStartIdx = htmlStr.find("<table")           
    htmlStr = htmlStr[tableStartIdx:len(htmlStr)]    
    tableEndIdx = htmlStr.find("</table")
-   htmlStr = htmlStr[0:tableEndIdx]
+   htmlStr = htmlStr[0:tableEndIdx] #see table.html for an example of how htmlStr looks at this point
    
    tableRows = htmlStr.split('<tr>')
 
@@ -26,10 +26,10 @@ def publicIperfServers():
       server = parseTableRow(row)
       if server:
          servers.append(server)
-      print("-----------\n\n", row)
+      if(debug):
+         print("-----------\n\n", row)
    
    return servers
-
 
 
 """Parse a row in iperf server table into an IperfServer object
@@ -51,60 +51,10 @@ def parseTableRow(row):
       if mHostname and mPort:
          port = mPort[1]
          hostname = mHostname[1]
-
-         # servers.append(IperfServer(hostname, port))
          
-         print("{}:{}".format(hostname, port))
+         # print("{}:{}".format(hostname, port))
          return IperfServer(hostname, port)
       else:
          return None
    else:
       return None
-
-      # print("------------------\n\n\n")
-
-
-# htmlFile = open('table.html', 'w')
-# htmlFile.write(htmlStr)
-
-# print(htmlStr)
-
-
-
-
-
-
-# hostnameRegex = '<strong>(\w[\w-]+\.(?:\w[\w-]+\.)?(?:\w[\w-]+\.)?(?:\w[\w-]+\.)?(?:\w[\w-]+\.)?\w+)'
-# portRegex = '(\d+) TCP\/UDP'
-
-# servers = []
-
-# for row in tableRows:
-#    row = row.strip()
-#    lines = row.split('\n')
-#    if(len(lines) > 5):
-#       hostnameLine = lines[0]
-#       portLine = lines[5]
-#       mHostname = re.search(hostnameRegex, hostnameLine)
-#       mPort = re.search(portRegex, portLine)
-
-#       hostname=""
-#       port=""
-#       if mHostname and mPort:
-#          port = mPort[1]
-#          hostname = mHostname[1]
-
-#          servers.append(IperfServer(hostname, port))
-         
-
-#          print("{}:{}".format(hostname, port))
-
-#       print("------------------\n\n\n")
-
-
-servers = publicIperfServers()
-
-print("-"*20)
-for s in servers:
-   print("{}:{}".format(s.hostname, s.port))
-
